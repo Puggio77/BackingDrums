@@ -10,9 +10,14 @@ import SwiftUI
 struct BackingTracksView: View {
     
     let viewModel = CardViewModel()
+    @StateObject private var trackViewModel = TrackCardViewModel()
+    
     @State private var isPlaying = false
     @State private var currentTime: Double = 0.0
     @State private var totalTime: Double = 180.0
+    
+    @State private var showingTrackPicker = false
+    @State private var selectedTrack: Track? = nil
     
     var body: some View {
         
@@ -20,34 +25,57 @@ struct BackingTracksView: View {
             ScrollView {
                 VStack(spacing: 16) {
                     
-                    // MARK: -- Backing Track
-                    HStack {
-                        RoundedRectangle(cornerRadius: 16)
-                            .fill(Color.teal)
-                            .frame(width: 60, height: 60)
-                            .overlay(
-                                Image(systemName: "music.note.list")
-                                    .font(.title2)
-                                    .foregroundColor(.secondary)
-                            )
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("Blues Song 01")
-                                .font(.headline)
-                                .foregroundStyle(.primary)
-                            Text("Blues Artist")
-                                .font(.subheadline)
-                                .foregroundStyle(.secondary)
+                    // MARK: -- Backing Track (cliccabile)
+                    Button {
+                        showingTrackPicker.toggle()
+                    } label: {
+                        HStack {
+                            RoundedRectangle(cornerRadius: 16)
+                                .fill(Color.teal)
+                                .frame(width: 60, height: 60)
+                                .overlay(
+                                    Image(systemName: selectedTrack?.img ?? "music.note.list")
+                                        .font(.title2)
+                                        .foregroundColor(.secondary)
+                                )
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(selectedTrack?.SongName ?? "Blues Song 01")
+                                    .font(.headline)
+                                    .foregroundStyle(.primary)
+                                Text(selectedTrack?.Artist ?? "Blues Artist")
+                                    .font(.subheadline)
+                                    .foregroundStyle(.secondary)
+                            }
+                            .padding(.leading, 4)
+                            Spacer()
                         }
-                        .padding(.leading, 4)
-                        Spacer()
+                        .padding()
+                        .background(
+                            RoundedRectangle(cornerRadius: 20)
+                                .fill(Color(UIColor.secondarySystemBackground))
+                        )
+                        .shadow(radius: 1, y: 1)
+                        .padding(.horizontal)
                     }
-                    .padding()
-                    .background(
-                        RoundedRectangle(cornerRadius: 20)
-                            .fill(Color(UIColor.secondarySystemBackground))
-                    )
-                    .shadow(radius: 1, y: 1)
-                    .padding(.horizontal)
+                    .sheet(isPresented: $showingTrackPicker) {
+                        NavigationView {
+                            List(trackViewModel.tracks) { track in
+                                Button {
+                                    selectedTrack = track
+                                    showingTrackPicker = false
+                                } label: {
+                                    VStack(alignment: .leading) {
+                                        Text(track.SongName)
+                                            .font(.headline)
+                                        Text(track.Artist)
+                                            .font(.subheadline)
+                                            .foregroundColor(.secondary)
+                                    }
+                                }
+                            }
+                            .navigationTitle("Select a Track")
+                        }
+                    }
                     
                     // MARK: -- Track settings
                     VStack(alignment: .leading, spacing: 12) {
@@ -80,7 +108,7 @@ struct BackingTracksView: View {
                         .padding(.horizontal)
                     }
                     
-                    // MARK: -- Track info
+                    // MARK: -- Track info 
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Track Info")
                             .font(.title2)
@@ -89,13 +117,18 @@ struct BackingTracksView: View {
                             .padding(.horizontal)
                         
                         VStack(alignment: .leading, spacing: 6) {
-                            HStack {
-                                Image(systemName: "metronome")
-                                Text("Original Tempo: 120BPM")
-                            }
-                            HStack {
-                                Image(systemName: "music.quarternote.3")
-                                Text("Time Signature: 4/4")
+                            HStack(alignment: .top) {
+                                VStack(alignment: .leading, spacing: 6) {
+                                    HStack {
+                                        Image(systemName: "metronome")
+                                        Text("Original Tempo: \(selectedTrack?.OriginalTempo ?? "120 BPM")")
+                                    }
+                                    HStack {
+                                        Image(systemName: "music.quarternote.3")
+                                        Text("Time Signature: \(selectedTrack?.TimeSignature ?? "4/4")")
+                                    }
+                                }
+                                Spacer()
                             }
                         }
                         .padding()
@@ -109,7 +142,7 @@ struct BackingTracksView: View {
                     
                     // MARK: -- Music Player (finto)
                     VStack(spacing: 8) {
-                        Text("Song name?")
+                        Text(selectedTrack?.SongName ?? "Song name?")
                             .font(.headline)
                             .foregroundColor(.primary)
                         
