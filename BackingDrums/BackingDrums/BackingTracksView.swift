@@ -1,3 +1,10 @@
+//
+//  BackingTracksView.swift
+//  BackingDrums
+//
+//  Created by Riccardo Puggioni on 07/11/25.
+//
+
 import SwiftUI
 import AVFoundation
 
@@ -15,7 +22,6 @@ struct BackingTracksView: View {
     @State private var selectedTrack: Track? = nil
     
     @State private var showingSettingSheet = false
-    @State private var selectedSetting: String? = nil
     @State private var tempo: Double = 120
     @State private var pitch: Int = 0
     @State private var voiceCount: Int = 0
@@ -27,6 +33,7 @@ struct BackingTracksView: View {
                 VStack(spacing: 16) {
                     
                     // MARK: -- Backing Track
+                    //label of the Backing track that call the track from the Viewmodel
                     Button {
                         showingTrackPicker.toggle()
                     } label: {
@@ -58,6 +65,7 @@ struct BackingTracksView: View {
                         .shadow(radius: 1, y: 1)
                         .padding(.horizontal)
                     }
+                    //show the sheet with all the backing tracks
                     .sheet(isPresented: $showingTrackPicker) {
                         NavigationView {
                             List(trackViewModel.tracks) { track in
@@ -80,6 +88,7 @@ struct BackingTracksView: View {
                     }
                     
                     // MARK: -- Track settings
+                    //
                     VStack(alignment: .leading, spacing: 12) {
                         Text("Track Settings")
                             .font(.title2)
@@ -88,62 +97,85 @@ struct BackingTracksView: View {
                             .padding(.horizontal)
                         
                         LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
-                            ForEach(viewModel.cards) { card in
-                                if card.label == "Click" {
-                                    Button {
-                                        isClickOn.toggle()
-                                        if isClickOn {
-                                            metronome.start(bpm: tempo)
-                                        } else {
-                                            metronome.stop()
-                                        }
-                                    } label: {
-                                        VStack(spacing: 6) {
-                                            Text(isClickOn ? "on" : "off")
-                                                .font(.title3)
-                                                .fontWeight(.semibold)
-                                                .foregroundColor(.black)
-                                            Text("Click")
-                                                .font(.footnote)
-                                                .foregroundColor(.black)
-                                        }
-                                        .frame(maxWidth: .infinity)
-                                        .padding(.vertical, 10)
-                                        .background(
-                                            RoundedRectangle(cornerRadius: 16)
-                                                .fill(isClickOn ? Color.green : Color.red.opacity(0.4))
-                                        )
-                                        .shadow(color: Color.black.opacity(0.1), radius: 1, y: 1)
-                                    }
-                                } else {
-                                    Button {
-                                        selectedSetting = card.label
-                                        showingSettingSheet = true
-                                    } label: {
-                                        VStack(spacing: 6) {
-                                            Text(value(for: card.label))
-                                                .font(.title3)
-                                                .fontWeight(.semibold)
-                                                .foregroundColor(.black)
-                                            Text(card.label)
-                                                .font(.footnote)
-                                                .foregroundColor(.black)
-                                        }
-                                        .frame(maxWidth: .infinity)
-                                        .padding(.vertical, 10)
-                                        .background(
-                                            RoundedRectangle(cornerRadius: 16)
-                                                .fill(Color.teal)
-                                        )
-                                        .shadow(color: Color.black.opacity(0.1), radius: 1, y: 1)
-                                    }
-                                }
+                            
+                            VStack(spacing: 6) {
+                                Text("\(Int(tempo))")
+                                    .font(.title3)
+                                    .fontWeight(.semibold)
+                                Text("Tempo")
+                                    .font(.footnote)
+                                    .foregroundColor(.secondary)
                             }
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 10)
+                            .background(
+                                RoundedRectangle(cornerRadius: 16)
+                                    .fill(Color.teal.opacity(0.7))
+                            )
+                            
+                            VStack(spacing: 6) {
+                                Text("\(pitch)")
+                                    .font(.title3)
+                                    .fontWeight(.semibold)
+                                Text("Pitch")
+                                    .font(.footnote)
+                                    .foregroundColor(.secondary)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 10)
+                            .background(
+                                RoundedRectangle(cornerRadius: 16)
+                                    .fill(Color.teal.opacity(0.7))
+                            )
+                            
+                            VStack(spacing: 6) {
+                                Text("\(voiceCount) bars")
+                                    .font(.title3)
+                                    .fontWeight(.semibold)
+                                Text("Voice Count")
+                                    .font(.footnote)
+                                    .foregroundColor(.secondary)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 10)
+                            .background(
+                                RoundedRectangle(cornerRadius: 16)
+                                    .fill(Color.teal.opacity(0.7))
+                            )
+                            
+                            VStack(spacing: 6) {
+                                Text(isClickOn ? "on" : "off")
+                                    .font(.title3)
+                                    .fontWeight(.semibold)
+                                Text("Click")
+                                    .font(.footnote)
+                                    .foregroundColor(.secondary)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 10)
+                            .background(
+                                RoundedRectangle(cornerRadius: 16)
+                                    .fill(isClickOn ? Color.green.opacity(0.7) : Color.red.opacity(0.5))
+                            )
                         }
                         .padding(.horizontal)
+                        
+                        // Button to open the modal with the track settinf
+                        Button {
+                            showingSettingSheet = true
+                        } label: {
+                            Text("Edit Settings")
+                                .font(.headline)
+                                .foregroundColor(.white)
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(Color.teal)
+                                .cornerRadius(16)
+                                .padding(.horizontal)
+                        }
                     }
                     .sheet(isPresented: $showingSettingSheet) {
-                        settingSheet
+                        unifiedSettingSheet
                     }
                     
                     // MARK: -- Track info
@@ -170,15 +202,9 @@ struct BackingTracksView: View {
                             }
                         }
                         .padding()
-                        .background(
-                            RoundedRectangle(cornerRadius: 16)
-                                .fill(Color(UIColor.secondarySystemBackground))
-                        )
-                        .shadow(radius: 1, y: 1)
-                        .padding(.horizontal)
                     }
                     
-                    // MARK: -- Music Player
+                    // MARK: -- Music Player (finto)
                     VStack(spacing: 8) {
                         Text(selectedTrack?.SongName ?? "-")
                             .font(.headline)
@@ -227,32 +253,20 @@ struct BackingTracksView: View {
                 .padding(.top)
             }
             .navigationTitle("Drum Backing Tracks")
-            .onChange(of: tempo) { newTempo in
+            .onChange(of: tempo) { _, newTempo in
                 metronome.update(bpm: newTempo)
             }
         }
     }
     
     // MARK: -- Helpers
+    //format the time in minute:seconds
     func formatTime(_ seconds: Double) -> String {
         let minutes = Int(seconds) / 60
         let secs = Int(seconds) % 60
         return String(format: "%d:%02d", minutes, secs)
     }
-    
-    func value(for label: String) -> String {
-        switch label {
-        case "Tempo":
-            return "\(Int(tempo))"
-        case "Pitch":
-            return "\(pitch)"
-        case "Voice Count":
-            return "\(voiceCount) bars"
-        default:
-            return "-"
-        }
-    }
-    
+    // Extracts the tempo value
     func clampTempo(from originalTempoString: String) -> Double {
         let digits = originalTempoString
             .split(separator: " ")
@@ -261,44 +275,59 @@ struct BackingTracksView: View {
         return min(200, max(60, digits))
     }
     
-    var settingSheet: some View {
-        NavigationView {
-            VStack(spacing: 20) {
-                if selectedSetting == "Tempo" {
-                    VStack {
-                        Text("Tempo: \(Int(tempo)) BPM")
-                            .font(.headline)
-                        Slider(value: $tempo, in: 60...200, step: 1)
-                    }
-                    .padding()
-                } else if selectedSetting == "Pitch" {
-                    VStack {
-                        Text("Pitch")
-                            .font(.headline)
-                        Picker("Pitch", selection: $pitch) {
-                            ForEach(-12...12, id: \.self) { value in
-                                Text("\(value)").tag(value)
-                            }
-                        }
-                        .pickerStyle(.wheel)
-                    }
-                    .padding()
-                } else if selectedSetting == "Voice Count" {
-                    VStack {
-                        Text("Voice Count")
-                            .font(.headline)
-                        Picker("Voice Count", selection: $voiceCount) {
-                            ForEach(0...4, id: \.self) { i in
-                                Text("\(i) bars").tag(i)
-                            }
-                        }
-                        .pickerStyle(.wheel)
-                    }
-                    .padding()
+    // MARK: -- Unified Setting Sheet
+    //the complete modal of the settings of the app
+    var unifiedSettingSheet: some View {
+        NavigationStack {
+            VStack(spacing: 24) {
+                // TEMPO
+                VStack(alignment: .leading) {
+                    Text("Tempo: \(Int(tempo)) BPM")
+                        .font(.headline)
+                    Slider(value: $tempo, in: 60...200, step: 1)
                 }
+                .padding(.horizontal)
+                
+                // PITCH
+                VStack(alignment: .leading) {
+                    Text("Pitch")
+                        .font(.headline)
+                    Picker("Pitch", selection: $pitch) {
+                        ForEach(-12...12, id: \.self) { value in
+                            Text("\(value)").tag(value)
+                        }
+                    }
+                    .pickerStyle(.wheel)
+                }
+                .padding(.horizontal)
+                
+                // VOICE COUNT
+                VStack(alignment: .leading) {
+                    Text("Voice Count")
+                        .font(.headline)
+                    Picker("Voice Count", selection: $voiceCount) {
+                        ForEach(0...4, id: \.self) { i in
+                            Text("\(i) bars").tag(i)
+                        }
+                    }
+                    .pickerStyle(.wheel)
+                }
+                .padding(.horizontal)
+                
+                // CLICK ON/OFF
+                Toggle("Metronome Click", isOn: $isClickOn)
+                    .padding(.horizontal)
+                    .onChange(of: isClickOn) { _, newValue in
+                        if newValue {
+                            metronome.start(bpm: tempo)
+                        } else {
+                            metronome.stop()
+                        }
+                    }
+                
                 Spacer()
             }
-            .navigationTitle(selectedSetting ?? "Settings")
+            .navigationTitle("Edit Settings")
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Done") { showingSettingSheet = false }
