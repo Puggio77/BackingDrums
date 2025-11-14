@@ -33,7 +33,6 @@ struct BackingTracksView: View {
                 VStack(spacing: 16) {
                     
                     // MARK: -- Backing Track
-                    //label of the Backing track that call the track from the Viewmodel
                     Button {
                         showingTrackPicker.toggle()
                     } label: {
@@ -65,7 +64,6 @@ struct BackingTracksView: View {
                         .shadow(radius: 1, y: 1)
                         .padding(.horizontal)
                     }
-                    //show the sheet with all the backing tracks
                     .sheet(isPresented: $showingTrackPicker) {
                         NavigationView {
                             List(trackViewModel.tracks) { track in
@@ -87,15 +85,60 @@ struct BackingTracksView: View {
                         }
                     }
                     
-                    // MARK: -- Track settings
-                    //
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("Track Settings")
+                    // MARK: -- Track Info
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Track Info")
                             .font(.title2)
                             .fontWeight(.bold)
                             .foregroundColor(.primary)
                             .padding(.horizontal)
                         
+                        VStack(alignment: .leading, spacing: 6) {
+                            HStack(alignment: .top) {
+                                VStack(alignment: .leading, spacing: 6) {
+                                    HStack {
+                                        Image(systemName: "metronome")
+                                        Text("Original Tempo: ")
+                                            .font(.callout)
+                                            .fontWeight(.heavy)
+                                        Text("\(selectedTrack?.OriginalTempo ?? "-")")
+                                    }
+                                    HStack {
+                                        Image(systemName: "music.quarternote.3")
+                                        Text("Time Signature: ")
+                                            .font(.callout)
+                                            .fontWeight(.heavy)
+                                        Text("\(selectedTrack?.TimeSignature ?? "-")")
+                                    }
+                                }
+                                Spacer()
+                            }
+                        }
+                        .padding()
+                    }
+                    
+                    // MARK: -- Track settings
+                    VStack(alignment: .leading, spacing: 12) {
+                        
+                        HStack {
+                            Text("Track Settings")
+                                .font(.title2)
+                                .fontWeight(.bold)
+                                .foregroundColor(.primary)
+                            
+                            Spacer()
+                            
+                            Button {
+                                showingSettingSheet = true
+                            } label: {
+                                Image(systemName: "ellipsis.circle")
+                                    .font(.title2)
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                        .padding(.horizontal)
+                        
+                        // Summary cards grid
                         LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
                             
                             VStack(spacing: 6) {
@@ -159,52 +202,12 @@ struct BackingTracksView: View {
                             )
                         }
                         .padding(.horizontal)
-                        
-                        // Button to open the modal with the track settinf
-                        Button {
-                            showingSettingSheet = true
-                        } label: {
-                            Text("Edit Settings")
-                                .font(.headline)
-                                .foregroundColor(.white)
-                                .frame(maxWidth: .infinity)
-                                .padding()
-                                .background(Color.teal)
-                                .cornerRadius(16)
-                                .padding(.horizontal)
-                        }
                     }
                     .sheet(isPresented: $showingSettingSheet) {
                         unifiedSettingSheet
                     }
                     
-                    // MARK: -- Track info
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Track Info")
-                            .font(.title2)
-                            .fontWeight(.bold)
-                            .foregroundColor(.primary)
-                            .padding(.horizontal)
-                        
-                        VStack(alignment: .leading, spacing: 6) {
-                            HStack(alignment: .top) {
-                                VStack(alignment: .leading, spacing: 6) {
-                                    HStack {
-                                        Image(systemName: "metronome")
-                                        Text("Original Tempo: \(selectedTrack?.OriginalTempo ?? "-")")
-                                    }
-                                    HStack {
-                                        Image(systemName: "music.quarternote.3")
-                                        Text("Time Signature: \(selectedTrack?.TimeSignature ?? "-")")
-                                    }
-                                }
-                                Spacer()
-                            }
-                        }
-                        .padding()
-                    }
-                    
-                    // MARK: -- Music Player (finto)
+                    // MARK: -- Music Player
                     VStack(spacing: 8) {
                         Text(selectedTrack?.SongName ?? "-")
                             .font(.headline)
@@ -260,13 +263,13 @@ struct BackingTracksView: View {
     }
     
     // MARK: -- Helpers
-    //format the time in minute:seconds
+    
     func formatTime(_ seconds: Double) -> String {
         let minutes = Int(seconds) / 60
         let secs = Int(seconds) % 60
         return String(format: "%d:%02d", minutes, secs)
     }
-    // Extracts the tempo value
+    
     func clampTempo(from originalTempoString: String) -> Double {
         let digits = originalTempoString
             .split(separator: " ")
@@ -275,12 +278,11 @@ struct BackingTracksView: View {
         return min(200, max(60, digits))
     }
     
-    // MARK: -- Unified Setting Sheet
-    //the complete modal of the settings of the app
+    // MARK: -- Settings Sheet
     var unifiedSettingSheet: some View {
         NavigationStack {
             VStack(spacing: 24) {
-                // TEMPO
+                
                 VStack(alignment: .leading) {
                     Text("Tempo: \(Int(tempo)) BPM")
                         .font(.headline)
@@ -288,7 +290,6 @@ struct BackingTracksView: View {
                 }
                 .padding(.horizontal)
                 
-                // PITCH
                 VStack(alignment: .leading) {
                     Text("Pitch")
                         .font(.headline)
@@ -301,7 +302,6 @@ struct BackingTracksView: View {
                 }
                 .padding(.horizontal)
                 
-                // VOICE COUNT
                 VStack(alignment: .leading) {
                     Text("Voice Count")
                         .font(.headline)
@@ -314,15 +314,11 @@ struct BackingTracksView: View {
                 }
                 .padding(.horizontal)
                 
-                // CLICK ON/OFF
                 Toggle("Metronome Click", isOn: $isClickOn)
                     .padding(.horizontal)
                     .onChange(of: isClickOn) { _, newValue in
-                        if newValue {
-                            metronome.start(bpm: tempo)
-                        } else {
-                            metronome.stop()
-                        }
+                        if newValue { metronome.start(bpm: tempo) }
+                        else { metronome.stop() }
                     }
                 
                 Spacer()
