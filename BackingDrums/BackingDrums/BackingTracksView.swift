@@ -77,16 +77,28 @@ struct BackingTracksView: View {
                                     selectedTrack = track
                                     tempo = clampTempo(from: track.OriginalTempo)
                                     
-                                    // CARICA AUDIO SOLO PER BLUES 01
+                                    
                                     if track.SongName == "Blues 01" {
                                         audioPlayer.loadWav(named: "Blues Drumless Backing Track")
                                         totalTime = audioPlayer.duration
                                         currentTime = 0
+                                        
+                                    } else if track.SongName == "Funk 02" {
+                                        audioPlayer.loadWav(named: "funk02")
+                                        totalTime = audioPlayer.duration
+                                        currentTime = 0
+
+                                    } else if track.SongName == "Rock 01" {
+                                        audioPlayer.loadWav(named: "rock01")
+                                        totalTime = audioPlayer.duration
+                                        currentTime = 0
+
                                     } else {
                                         audioPlayer.stop()
                                         currentTime = 0
                                         totalTime = 180
                                     }
+
                                     
                                     showingTrackPicker = false
                                 } label: {

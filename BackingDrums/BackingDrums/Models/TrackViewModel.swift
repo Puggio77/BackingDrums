@@ -12,7 +12,7 @@ import Combine
 class TrackCardViewModel: ObservableObject {
     @Published var tracks: [Track] = [
         // MARK: - Blues
-        Track(SongName: "Blues 01", Artist: "Blues Artist", OriginalTempo: "90 BPM", TimeSignature: "12/8"),
+        Track(SongName: "Blues 01", Artist: "Blues Artist", OriginalTempo: "120 BPM", TimeSignature: "12/8"),
         Track(SongName: "Blues 02", Artist: "Blues Artist", OriginalTempo: "100 BPM", TimeSignature: "4/4"),
         Track(SongName: "Blues 03", Artist: "Blues Artist", OriginalTempo: "80 BPM", TimeSignature: "6/8"),
         
@@ -38,7 +38,7 @@ class TrackCardViewModel: ObservableObject {
         
         // MARK: - Funk
         Track(SongName: "Funk 01", Artist: "Funk Artist", OriginalTempo: "100 BPM", TimeSignature: "4/4"),
-        Track(SongName: "Funk 02", Artist: "Funk Artist", OriginalTempo: "105 BPM", TimeSignature: "4/4"),
+        Track(SongName: "Funk 02", Artist: "Funk Artist", OriginalTempo: "100 BPM", TimeSignature: "4/4"),
         Track(SongName: "Funk 03", Artist: "Funk Artist", OriginalTempo: "110 BPM", TimeSignature: "3/4"),
         
         // MARK: - Reggae
