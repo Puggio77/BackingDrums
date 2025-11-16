@@ -10,20 +10,23 @@ import AVFoundation
 
 struct BackingTracksView: View {
     
+    //Track List funx
     let viewModel = CardViewModel()
     @StateObject private var trackViewModel = TrackCardViewModel()
+    //metronome func
     @StateObject private var metronome = Metronome()
     
-    // AUDIO PLAYER
+    //audio player manager
     @StateObject private var audioPlayer = AudioPlayerManager()
     
     @State private var isPlaying = false
     @State private var currentTime: Double = 0.0
     @State private var totalTime: Double = 180.0
     
+    //Track sheet manager
     @State private var showingTrackPicker = false
     @State private var selectedTrack: Track? = nil
-    
+    //Track Settings sheet manager
     @State private var showingSettingSheet = false
     @State private var tempo: Double = 120
     @State private var pitch: Int = 0
@@ -76,8 +79,7 @@ struct BackingTracksView: View {
                                     
                                     selectedTrack = track
                                     tempo = clampTempo(from: track.OriginalTempo)
-                                    
-                                    
+                                    //song to play
                                     if track.SongName == "Blues 01" {
                                         audioPlayer.loadWav(named: "Blues Drumless Backing Track")
                                         totalTime = audioPlayer.duration
@@ -87,18 +89,17 @@ struct BackingTracksView: View {
                                         audioPlayer.loadWav(named: "funk02")
                                         totalTime = audioPlayer.duration
                                         currentTime = 0
-
+                                        
                                     } else if track.SongName == "Rock 01" {
                                         audioPlayer.loadWav(named: "rock01")
                                         totalTime = audioPlayer.duration
                                         currentTime = 0
-
+                                        
                                     } else {
                                         audioPlayer.stop()
                                         currentTime = 0
                                         totalTime = 180
                                     }
-
                                     
                                     showingTrackPicker = false
                                 } label: {
@@ -169,7 +170,7 @@ struct BackingTracksView: View {
                             }
                         }
                         .padding(.horizontal)
-                        
+                        //Grid for the dashboard
                         LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
                             
                             VStack(spacing: 6) {
@@ -308,7 +309,7 @@ struct BackingTracksView: View {
             }
             .navigationTitle("Backing Tracks")
             
-            // RATE + BPM SYNC
+            // rate + bpm sync
             .onChange(of: tempo) { _, newTempo in
                 
                 if let selectedTrack {
@@ -321,12 +322,12 @@ struct BackingTracksView: View {
                 }
             }
             
-            // PITCH
+            // Pitch
             .onChange(of: pitch) { _, newPitch in
                 audioPlayer.changePitch(semitones: newPitch)
             }
             
-            // CLICK TOGGLE (non avvia più il metronomo autonomamente)
+            // click toggle
             .onChange(of: isClickOn) { _, newValue in
                 if audioPlayer.isPlaying {
                     if newValue {
@@ -339,7 +340,7 @@ struct BackingTracksView: View {
                 }
             }
             
-            // SYNC SLIDER
+            // sync slider with the player
             .onReceive(audioPlayer.$currentTime) { time in
                 currentTime = time
             }
@@ -350,13 +351,13 @@ struct BackingTracksView: View {
     }
     
     // MARK: -- Helpers
-    
+    //Formaat the time min:sec
     func formatTime(_ seconds: Double) -> String {
         let minutes = Int(seconds) / 60
         let secs = Int(seconds) % 60
         return String(format: "%d:%02d", minutes, secs)
     }
-    
+    //take only the value from the bpm part
     func clampTempo(from originalTempoString: String) -> Double {
         let digits = originalTempoString
             .split(separator: " ")
@@ -370,14 +371,38 @@ struct BackingTracksView: View {
         NavigationStack {
             VStack(spacing: 24) {
                 
-                VStack(alignment: .leading) {
+                VStack(alignment: .leading, spacing: 12) {
+                    //Tempo slide
                     Text("Tempo: \(Int(tempo)) BPM")
                         .font(.headline)
-                    Slider(value: $tempo, in: 60...200, step: 1)
+                    
+                    HStack {
+                        
+                        Button(action: {
+                            //Decrease tempo 1 BPM
+                            if tempo > 60 { tempo -= 1 }
+                        }) {
+                            Image(systemName: "minus.circle.fill")
+                                .font(.title2)
+                                .foregroundColor(.teal)
+                        }
+                        
+                        Slider(value: $tempo, in: 60...200, step: 1)
+                        
+                        // Increase tempo 1 BPM
+                        Button(action: {
+                            if tempo < 200 { tempo += 1 }
+                        }) {
+                            Image(systemName: "plus.circle.fill")
+                                .font(.title2)
+                                .foregroundColor(.teal)
+                        }
+                    }
                 }
                 .padding(.horizontal)
                 
                 VStack(alignment: .leading) {
+                    //Pitch Picker
                     Text("Pitch")
                         .font(.headline)
                     Picker("Pitch", selection: $pitch) {
@@ -390,6 +415,7 @@ struct BackingTracksView: View {
                 .padding(.horizontal)
                 
                 VStack(alignment: .leading) {
+                    //Voice Count Picker
                     Text("Voice Count")
                         .font(.headline)
                     Picker("Voice Count", selection: $voiceCount) {
@@ -401,6 +427,7 @@ struct BackingTracksView: View {
                 }
                 .padding(.horizontal)
                 
+                //click toggle
                 Toggle("Metronome Click", isOn: $isClickOn)
                     .padding(.horizontal)
                 
